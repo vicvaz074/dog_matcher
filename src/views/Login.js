@@ -44,7 +44,7 @@ function Login({ setIsAuthenticated }) {
         <div className="col-md-6">
           <animated.div style={animationProps}>
             <div className="card">
-              <div className="card-header">Login</div>
+              <div className="card-header">Login and Save a Dog</div>
               <div className="card-body">
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
