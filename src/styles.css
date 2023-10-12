@@ -64,5 +64,35 @@
     justify-content: center;
     width: 100%;
   }
+
+.btn {
+    margin: 5px;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary, .btn-info, .btn-success {
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover, .btn-info:hover, .btn-success:hover {
+    background-color: darken($color, 10%);
+}
+
+.random-dog-match {
+    margin-top: 20px;
+    text-align: center;
+}
   
   
