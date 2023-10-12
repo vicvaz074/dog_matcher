@@ -1,0 +1,68 @@
+/* Estilo de contenedor para centrar el contenido */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Estilo para los formularios */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .error {
+    color: red;
+  }
+  
+  body {
+    background-color: #ECF0F1;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .card {
+    border-color: #2C3E50;
+    transition: transform 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+  }
+  
+  .card-header {
+    background-color: #2C3E50;
+    color: #ECF0F1;
+  }
+  
+  .btn-primary {
+    background-color: #2C3E50;
+    border-color: #2C3E50;
+  }
+  
+  .btn-primary:hover, .btn-primary:focus {
+    background-color: #1A242F;
+    border-color: #1A242F;
+  }
+  
+  .card-img-top {
+    object-fit: cover;
+    height: 200px;
+  }
+  
+  .search-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .advanced-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  
