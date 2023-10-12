@@ -6,11 +6,11 @@ function SearchPage() {
   const [breeds, setBreeds] = useState([]);
   const [selectedBreed, setSelectedBreed] = useState('');
   const [dogs, setDogs] = useState([]);
-  const [ageMin, setAgeMin] = useState('');
-  const [ageMax, setAgeMax] = useState('');
-  const [zipCode, setZipCode] = useState('');
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  
+  const [favorites, setFavorites] = useState([]);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   const fadeIn = useSpring({
     opacity: 1,
     from: { opacity: 0 },
@@ -19,52 +19,83 @@ function SearchPage() {
 
   useEffect(() => {
     async function fetchBreeds() {
-      const response = await axios.get('https://frontend-take-home-service.fetch.com/dogs/breeds');
-      setBreeds(response.data);
+      try {
+        const response = await axios.get('https://frontend-take-home-service.fetch.com/dogs/breeds');
+        setBreeds(response.data);
+      } catch (error) {
+        console.error("Error fetching breeds:", error);
+      }
     }
     fetchBreeds();
   }, []);
 
-  const handleSearch = async () => {
-    let query = `https://frontend-take-home-service.fetch.com/dogs/search?breeds=${selectedBreed}`;
-    if (showAdvanced) {
-      if (ageMin) query += `&ageMin=${ageMin}`;
-      if (ageMax) query += `&ageMax=${ageMax}`;
-      if (zipCode) query += `&zipCodes=${zipCode}`;
+  const handleSearch = async (page = 1) => {
+    try {
+      const from = (page - 1) * pageSize;
+      const response = await axios.get(`https://frontend-take-home-service.fetch.com/dogs/search?breeds=${selectedBreed}&from=${from}&size=${pageSize}`);
+      const dogIds = response.data.resultIds;
+      if (dogIds.length) {
+        const dogDataResponse = await axios.post('https://frontend-take-home-service.fetch.com/dogs', dogIds);
+        setDogs(dogDataResponse.data);
+      } else {
+        setDogs([]);
+      }
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Error fetching dogs:", error);
     }
+  };
 
-    const response = await axios.get(query);
-    const dogIds = response.data.resultIds;
-    if (dogIds.length) {
-      const dogDataResponse = await axios.post('https://frontend-take-home-service.fetch.com/dogs', dogIds);
-      setDogs(dogDataResponse.data);
+  const toggleFavorite = (dogId) => {
+    if (favorites.includes(dogId)) {
+      setFavorites(favorites.filter(id => id !== dogId));
     } else {
-      setDogs([]);
+      setFavorites([...favorites, dogId]);
+    }
+  };
+
+  const handleMatch = async () => {
+    // Aquí puedes hacer una llamada API para obtener una coincidencia basada en los favoritos
+    // Por simplicidad, vamos a elegir un perro al azar de los favoritos como "coincidencia"
+    const randomFavorite = favorites[Math.floor(Math.random() * favorites.length)];
+    alert(`Your match is: ${randomFavorite}`);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('https://frontend-take-home-service.fetch.com/auth/logout', {}, { withCredentials: true });
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error logging out:", error);
     }
   };
 
   return (
     <animated.div style={fadeIn} className="container mt-5">
       <h1>Search Page</h1>
+      <button onClick={handleLogout}>Logout</button>
       <div className="mb-4">
         <label htmlFor="breedSelect" className="form-label">Select a Breed</label>
         <select id="breedSelect" className="form-select" value={selectedBreed} onChange={(e) => setSelectedBreed(e.target.value)}>
           <option value="">Select a breed...</option>
-          {breeds.map(breed => <option key={breed} value={breed}>{breed}</option>)}
+          {breeds.map(breed => (
+            <option key={breed} value={breed}>{breed}</option>
+          ))}
         </select>
       </div>
-      <button className="btn btn-secondary mb-2" onClick={() => setShowAdvanced(!showAdvanced)}>Advanced Options</button>
-      {showAdvanced && (
-        <div className="mb-4">
-          <label htmlFor="ageMin">Min Age:</label>
-          <input type="number" id="ageMin" value={ageMin} onChange={(e) => setAgeMin(e.target.value)} />
-          <label htmlFor="ageMax">Max Age:</label>
-          <input type="number" id="ageMax" value={ageMax} onChange={(e) => setAgeMax(e.target.value)} />
-          <label htmlFor="zipCode">Zip Code:</label>
-          <input type="text" id="zipCode" value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
+      <button className="btn btn-primary mb-4" onClick={() => handleSearch(1)}>Search</button>
+      <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>Advanced Options</button>
+      {showAdvancedOptions && (
+        <div>
+          <h2>Favorites</h2>
+          <ul>
+            {favorites.map(favorite => (
+              <li key={favorite}>{favorite}</li>
+            ))}
+          </ul>
+          <button onClick={handleMatch}>Generate Match</button>
         </div>
       )}
-      <button className="btn btn-primary mb-4" onClick={handleSearch}>Search</button>
       <div className="row">
         {dogs.map(dog => (
           <div key={dog.id} className="col-md-4 mb-4">
@@ -75,10 +106,17 @@ function SearchPage() {
                 <p className="card-text">Age: {dog.age}</p>
                 <p className="card-text">Breed: {dog.breed}</p>
                 <p className="card-text">Zip Code: {dog.zip_code}</p>
+                <button onClick={() => toggleFavorite(dog.id)}>
+                  {favorites.includes(dog.id) ? 'Remove from Favorites' : 'Add to Favorites'}
+                </button>
               </div>
             </div>
           </div>
         ))}
+      </div>
+      <div>
+        <button onClick={() => handleSearch(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+        <button onClick={() => handleSearch(currentPage + 1)}>Next</button>
       </div>
     </animated.div>
   );
