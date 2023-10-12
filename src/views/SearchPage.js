@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSpring, animated } from 'react-spring';
 
 function SearchPage() {
+  // States for breeds, selected breed, dogs, advanced options, favorites, and random match
   const [breeds, setBreeds] = useState([]);
   const [selectedBreed, setSelectedBreed] = useState('');
   const [dogs, setDogs] = useState([]);
@@ -11,16 +12,16 @@ function SearchPage() {
   const [zipCode, setZipCode] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [favorites, setFavorites] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showFavorites, setShowFavorites] = useState(false);
-  const pageSize = 10;
+  const [randomDog, setRandomDog] = useState(null);
 
+  // Animation effect
   const fadeIn = useSpring({
     opacity: 1,
     from: { opacity: 0 },
     delay: 200
   });
 
+  // Fetch available breeds on component mount
   useEffect(() => {
     async function fetchBreeds() {
       const response = await axios.get('https://frontend-take-home-service.fetch.com/dogs/breeds');
@@ -29,15 +30,14 @@ function SearchPage() {
     fetchBreeds();
   }, []);
 
-  const handleSearch = async (page = 1) => {
-    setShowFavorites(false);
-    let query = `https://frontend-take-home-service.fetch.com/dogs/search?breeds=${selectedBreed}&from=${(page - 1) * pageSize}&size=${pageSize}`;
+  // Search handler
+  const handleSearch = async () => {
+    let query = `https://frontend-take-home-service.fetch.com/dogs/search?breeds=${selectedBreed}`;
     if (showAdvanced) {
       if (ageMin) query += `&ageMin=${ageMin}`;
       if (ageMax) query += `&ageMax=${ageMax}`;
       if (zipCode) query += `&zipCodes=${zipCode}`;
     }
-
     const response = await axios.get(query);
     const dogIds = response.data.resultIds;
     if (dogIds.length) {
@@ -46,21 +46,18 @@ function SearchPage() {
     } else {
       setDogs([]);
     }
-    setCurrentPage(page);
   };
 
-  const toggleFavorite = (dogId) => {
-    if (favorites.includes(dogId)) {
-      setFavorites(favorites.filter(id => id !== dogId));
-    } else {
-      setFavorites([...favorites, dogId]);
-    }
+  // Add dog to favorites
+  const handleAddToFavorites = (dog) => {
+    setFavorites([...favorites, dog]);
   };
 
-  const handleViewFavorites = () => {
-    setShowFavorites(true);
-    const favoriteDogs = dogs.filter(dog => favorites.includes(dog.id));
-    setDogs(favoriteDogs);
+  // Random match handler
+  const handleRandomMatch = () => {
+    const randomIndex = Math.floor(Math.random() * dogs.length);
+    const matchedDog = dogs[randomIndex];
+    setRandomDog(matchedDog);
   };
 
   return (
@@ -73,10 +70,7 @@ function SearchPage() {
           {breeds.map(breed => <option key={breed} value={breed}>{breed}</option>)}
         </select>
       </div>
-      <div style={{display: 'flex', justifyContent: 'center'}}>
-        <button className="btn btn-primary mb-4" onClick={() => handleSearch(1)}>Search</button>
-        <button className="btn btn-secondary mb-4 ml-2" onClick={() => setShowAdvanced(!showAdvanced)}>Advanced Options</button>
-      </div>
+      <button className="btn btn-secondary mb-2" onClick={() => setShowAdvanced(!showAdvanced)}>Advanced Options</button>
       {showAdvanced && (
         <div className="mb-4">
           <label htmlFor="ageMin">Min Age:</label>
@@ -87,7 +81,22 @@ function SearchPage() {
           <input type="text" id="zipCode" value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
         </div>
       )}
-      <button className="btn btn-info mb-4" onClick={handleViewFavorites}>View Favorites</button>
+      <button className="btn btn-primary mb-4" onClick={handleSearch}>Search</button>
+      <button className="btn btn-success mb-4" onClick={handleRandomMatch}>Match with a Random Dog</button>
+      {randomDog && (
+        <div className="random-dog-match">
+          <h3>Your Match:</h3>
+          <div className="card">
+            <img src={randomDog.img} alt={randomDog.name} className="card-img-top" />
+            <div className="card-body">
+              <h5 className="card-title">{randomDog.name}</h5>
+              <p className="card-text">Age: {randomDog.age}</p>
+              <p className="card-text">Breed: {randomDog.breed}</p>
+              <p className="card-text">Zip Code: {randomDog.zip_code}</p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="row">
         {dogs.map(dog => (
           <div key={dog.id} className="col-md-4 mb-4">
@@ -98,17 +107,20 @@ function SearchPage() {
                 <p className="card-text">Age: {dog.age}</p>
                 <p className="card-text">Breed: {dog.breed}</p>
                 <p className="card-text">Zip Code: {dog.zip_code}</p>
-                <button onClick={() => toggleFavorite(dog.id)}>
-                  {favorites.includes(dog.id) ? '💔 Remove from Favorites' : '❤️ Add to Favorites'}
-                </button>
+                <button onClick={() => handleAddToFavorites(dog)}>Add to Favorites</button>
               </div>
             </div>
           </div>
         ))}
       </div>
-      <div style={{display: 'flex', justifyContent: 'center'}}>
-        <button onClick={() => handleSearch(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
-        <button onClick={() => handleSearch(currentPage + 1)}>Next</button>
+      <div>
+        <h3>Your Favorites:</h3>
+        {favorites.map(dog => (
+          <div key={dog.id}>
+            <h4>{dog.name}</h4>
+            <img src={dog.img} alt={dog.name} width="100" />
+          </div>
+        ))}
       </div>
     </animated.div>
   );
