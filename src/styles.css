@@ -65,34 +65,56 @@
     width: 100%;
   }
 
-.btn {
+/* Estilo base para todos los botones */
+button {
+    padding: 10px 15px;
     margin: 5px;
     border-radius: 5px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-.btn-primary, .btn-info, .btn-success {
+    font-weight: bold;
     border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilo para los botones principales (Search, Advanced Options) */
+.btn-primary {
+    background-color: #2C3E50;
+    color: #ECF0F1;
+}
+
+.btn-primary:hover {
+    background-color: #1A242F;
+}
+
+/* Estilo para los botones de paginación (Next, Previous) */
+.btn-pagination {
+    background-color: #3498DB;
     color: white;
 }
 
-.btn-primary:hover, .btn-info:hover, .btn-success:hover {
-    background-color: darken($color, 10%);
+.btn-pagination:hover {
+    background-color: #2980B9;
 }
 
-.random-dog-match {
-    margin-top: 20px;
-    text-align: center;
+/* Estilo para el botón de "Add to Favorites" */
+.btn-favorite-add {
+    background-color: #E74C3C;
+    color: white;
 }
+
+.btn-favorite-add:hover {
+    background-color: #C0392B;
+}
+
+/* Estilo para el botón de "Remove from Favorites" */
+.btn-favorite-remove {
+    background-color: #F39C12;
+    color: white;
+}
+
+.btn-favorite-remove:hover {
+    background-color: #D35400;
+}
+
   
   
